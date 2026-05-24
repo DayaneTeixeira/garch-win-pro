@@ -1,0 +1,46 @@
+name: GARCH WIN PRO — Atualização Diária
+
+on:
+  schedule:
+    - cron: '57 22 * * 1-5'   # 22h57 UTC = 19h57 Brasília, seg a sex
+  workflow_dispatch:
+
+jobs:
+  rodar-garch:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install yfinance arch pandas numpy scipy
+
+      - name: Rodar script GARCH PRO
+        run: python garch_win_pro.py
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload do dashboard
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy para GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
